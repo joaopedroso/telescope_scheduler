@@ -1,0 +1,172 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>astro_tools &#8212; Telescope Scheduler  documentation</title>
+    <link rel="stylesheet" href="../_static/graphite.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/language_data.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Telescope Scheduler  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="index.html" accesskey="U">Module code</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for astro_tools</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">astro_tools: Useful tools for telescope scheduling based on astropy</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">astropy.coordinates</span> <span class="k">import</span> <span class="n">EarthLocation</span><span class="p">,</span> <span class="n">AltAz</span>
+
+
+<div class="viewcode-block" id="calc_altaz"><a class="viewcode-back" href="../generated/astro_tools.html#astro_tools.calc_altaz">[docs]</a><span class="k">def</span> <span class="nf">calc_altaz</span><span class="p">(</span><span class="n">time</span><span class="p">,</span> <span class="n">loc</span><span class="p">,</span> <span class="n">obj</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Convert RA/Dec to Alt/Az</span>
+
+<span class="sd">    :param time: time of the observation</span>
+<span class="sd">    :param loc: array with positions</span>
+<span class="sd">    :param obj: array with positions in SkyCoord coordinated</span>
+<span class="sd">    :return: tuple with arrays of positions in alt and az coordinates</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">azuse</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">tmpaltaz</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">transform_to</span><span class="p">(</span><span class="n">AltAz</span><span class="p">(</span><span class="n">obstime</span><span class="o">=</span><span class="n">time</span><span class="p">,</span> <span class="n">location</span><span class="o">=</span><span class="n">loc</span><span class="p">))</span>
+    <span class="n">tmpalt</span> <span class="o">=</span> <span class="n">tmpaltaz</span><span class="o">.</span><span class="n">alt</span><span class="o">.</span><span class="n">degree</span>
+    <span class="n">tmpaz</span> <span class="o">=</span> <span class="n">tmpaltaz</span><span class="o">.</span><span class="n">az</span><span class="o">.</span><span class="n">degree</span> <span class="o">+</span> <span class="mf">90.0</span>
+    <span class="k">for</span> <span class="n">azazaz</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">tmpaz</span><span class="p">)):</span>
+        <span class="k">if</span> <span class="n">tmpaz</span><span class="p">[</span><span class="n">azazaz</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mf">360.0</span><span class="p">:</span>
+            <span class="n">tmptmpaz</span> <span class="o">=</span> <span class="n">tmpaz</span><span class="p">[</span><span class="n">azazaz</span><span class="p">]</span> <span class="o">-</span> <span class="mf">360.0</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">tmptmpaz</span> <span class="o">=</span> <span class="n">tmpaz</span><span class="p">[</span><span class="n">azazaz</span><span class="p">]</span>
+        <span class="n">azuse</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tmptmpaz</span><span class="p">)</span>
+    <span class="n">altuse</span> <span class="o">=</span> <span class="n">tmpalt</span>
+    <span class="k">return</span> <span class="n">altuse</span><span class="p">,</span> <span class="n">azuse</span></div>
+
+
+<div class="viewcode-block" id="is_within_angle"><a class="viewcode-back" href="../generated/astro_tools.html#astro_tools.is_within_angle">[docs]</a><span class="k">def</span> <span class="nf">is_within_angle</span><span class="p">(</span><span class="n">obj_alt</span><span class="p">,</span> <span class="n">obj_az</span><span class="p">,</span> <span class="n">point_alt</span><span class="p">,</span> <span class="n">point_az</span><span class="p">,</span> <span class="n">within_angle</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Determine if a position is hidden by some object</span>
+
+<span class="sd">    :param obj_alt: interfering object&#39;s position (alt)</span>
+<span class="sd">    :param obj_az: interfering object&#39;s position (az)</span>
+<span class="sd">    :param point_alt: position of point being observed (alt)</span>
+<span class="sd">    :param point_az: position of point being observed (az)</span>
+<span class="sd">    :param within_angle: defines zone around center of interfering object to avoid</span>
+<span class="sd">    :returns: True if there is interference, False otherwise</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">angle</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">acos</span><span class="p">(</span>
+        <span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">obj_alt</span><span class="p">)</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">point_alt</span><span class="p">)</span>
+        <span class="o">+</span> <span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">obj_alt</span><span class="p">)</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">point_alt</span><span class="p">)</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">obj_az</span> <span class="o">-</span> <span class="n">point_az</span><span class="p">)</span>
+    <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">angle</span> <span class="o">*</span> <span class="mi">180</span> <span class="o">/</span> <span class="n">math</span><span class="o">.</span><span class="n">pi</span> <span class="o">&lt;</span> <span class="n">within_angle</span></div>
+
+
+<div class="viewcode-block" id="is_hidden_by_moon"><a class="viewcode-back" href="../generated/astro_tools.html#astro_tools.is_hidden_by_moon">[docs]</a><span class="k">def</span> <span class="nf">is_hidden_by_moon</span><span class="p">(</span><span class="n">moon</span><span class="p">,</span> <span class="n">point</span><span class="p">,</span> <span class="n">location</span><span class="p">,</span> <span class="n">obstime</span><span class="p">,</span> <span class="n">within_angle</span><span class="o">=</span><span class="mf">0.25</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Determine if a position is hidden by the moon</span>
+
+<span class="sd">    :param moon: approximate coordinates of the moon, as returned by astropy.coordinates.get_body</span>
+<span class="sd">    :param point: sky position being observed (in SkyCoord coordinates)</span>
+<span class="sd">    :param location: EarthLocation from which observation is made (eg, Kiso)</span>
+<span class="sd">    :param obstime: observation time</span>
+<span class="sd">    :param within_angle: defines zone around center of interfering object to avoid</span>
+<span class="sd">    :returns: True if there is interference, False otherwise</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># `moon` should be obtained with:</span>
+    <span class="c1"># with solar_system_ephemeris.set(&#39;builtin&#39;):</span>
+    <span class="c1"># 	moon = get_body(&#39;moon&#39;, obstime, telescope_pos)</span>
+
+    <span class="n">moon_from_loc</span> <span class="o">=</span> <span class="n">moon</span><span class="o">.</span><span class="n">transform_to</span><span class="p">(</span><span class="n">AltAz</span><span class="p">(</span><span class="n">obstime</span><span class="o">=</span><span class="n">obstime</span><span class="p">,</span> <span class="n">location</span><span class="o">=</span><span class="n">location</span><span class="p">))</span>
+    <span class="n">moon_alt</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">-</span> <span class="n">moon_from_loc</span><span class="o">.</span><span class="n">alt</span><span class="o">.</span><span class="n">rad</span>
+    <span class="n">moon_az</span> <span class="o">=</span> <span class="n">moon_from_loc</span><span class="o">.</span><span class="n">az</span><span class="o">.</span><span class="n">rad</span>
+
+    <span class="n">point_from_loc</span> <span class="o">=</span> <span class="n">point</span><span class="o">.</span><span class="n">transform_to</span><span class="p">(</span><span class="n">AltAz</span><span class="p">(</span><span class="n">obstime</span><span class="o">=</span><span class="n">obstime</span><span class="p">,</span> <span class="n">location</span><span class="o">=</span><span class="n">location</span><span class="p">))</span>
+    <span class="n">point_alt</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">-</span> <span class="n">point_from_loc</span><span class="o">.</span><span class="n">alt</span><span class="o">.</span><span class="n">rad</span>
+    <span class="n">point_az</span> <span class="o">=</span> <span class="n">point_from_loc</span><span class="o">.</span><span class="n">az</span><span class="o">.</span><span class="n">rad</span>
+
+    <span class="n">angle</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">acos</span><span class="p">(</span>
+        <span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">moon_alt</span><span class="p">)</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">point_alt</span><span class="p">)</span>
+        <span class="o">+</span> <span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">moon_alt</span><span class="p">)</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">point_alt</span><span class="p">)</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">moon_az</span> <span class="o">-</span> <span class="n">point_az</span><span class="p">)</span>
+    <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">angle</span> <span class="o">*</span> <span class="mi">180</span> <span class="o">/</span> <span class="n">math</span><span class="o">.</span><span class="n">pi</span> <span class="o">&lt;</span> <span class="n">within_angle</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../index.html">
+              <img class="logo" src="../_static/tomoe.jpg" alt="Logo"/>
+            </a></p>
+<h3><a href="../index.html">Table of Contents</a></h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../generated/simulator.html">simulator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../generated/scheduler.html">scheduler</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../generated/hidden.html">hidden</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../generated/instance.html">instance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../generated/motion_time.html">motion_time</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../generated/obs_data.html">obs_data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../generated/solution.html">solution</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../generated/astro_tools.html">astro_tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../generated/constants.html">constants</a></li>
+</ul>
+
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Telescope Scheduler  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="index.html" >Module code</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2019, jpp.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.1.2.
+    </div>
+  </body>
+</html>

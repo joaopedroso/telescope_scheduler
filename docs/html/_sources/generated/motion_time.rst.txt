@@ -1,0 +1,22 @@
+motion\_time
+============
+
+.. automodule:: motion_time
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      motion_time
+   
+   
+
+   
+   
+   
+
+   
+   
+   

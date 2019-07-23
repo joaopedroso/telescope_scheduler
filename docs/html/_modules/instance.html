@@ -1,0 +1,212 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>instance &#8212; Telescope Scheduler  documentation</title>
+    <link rel="stylesheet" href="../_static/graphite.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/language_data.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Telescope Scheduler  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="index.html" accesskey="U">Module code</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for instance</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">instance: Define observation&#39;s start/end time and positions</span>
+
+<span class="sd">Functions:</span>
+<span class="sd">    - mk_obs_time(): returns tuple with starting and ending time</span>
+<span class="sd">    - mk_obs_set(): return list with SkyCoord positions to observe</span>
+
+<span class="sd">Rewrite these functions for specifying a different instance.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">astropy.time</span> <span class="k">import</span> <span class="n">Time</span>
+<span class="kn">from</span> <span class="nn">astropy.coordinates</span> <span class="k">import</span> <span class="n">SkyCoord</span>
+<span class="kn">from</span> <span class="nn">astropy.coordinates</span> <span class="k">import</span> <span class="n">Latitude</span><span class="p">,</span> <span class="n">Longitude</span>
+<span class="kn">from</span> <span class="nn">constants</span> <span class="k">import</span> <span class="o">*</span>
+
+
+<span class="c1">### define Tomo-e&#39;s observing regions (fixed in the RA/Dec coordinate)</span>
+<span class="c1">###    (RA, Dec) &lt;==&gt; (b, l) conversion is also calculated.</span>
+<span class="k">def</span> <span class="nf">tomoe_fov_radec</span><span class="p">(</span><span class="n">ra_start</span><span class="p">,</span> <span class="n">dec_start</span><span class="p">,</span> <span class="n">tomoe_fov</span><span class="p">,</span> <span class="n">overlap</span><span class="p">):</span>
+    <span class="n">tmpra_list</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">tmpdec_list</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">tmplll_list</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">tmpbbb_list</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">tmpfov_list</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="n">fovnum</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="c1">### Dec &gt;= 0</span>
+    <span class="n">tmpdec</span> <span class="o">=</span> <span class="n">dec_start</span>
+    <span class="k">while</span> <span class="n">tmpdec</span> <span class="o">&gt;=</span> <span class="o">-</span><span class="mf">0.01</span> <span class="ow">and</span> <span class="n">tmpdec</span> <span class="o">&lt;</span> <span class="mf">90.0</span><span class="p">:</span>
+        <span class="c1"># print (tmpdec)</span>
+        <span class="k">for</span> <span class="n">nnn</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">int</span><span class="p">((</span><span class="mf">360.0</span> <span class="o">+</span> <span class="n">overlap</span><span class="p">)</span> <span class="o">/</span> <span class="p">((</span><span class="n">tomoe_fov</span> <span class="o">-</span> <span class="n">overlap</span><span class="p">)</span> <span class="o">/</span> <span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">tmpdec</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mf">180.0</span><span class="p">))</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)):</span>
+            <span class="k">if</span> <span class="n">nnn</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">tmpra</span> <span class="o">=</span> <span class="n">ra_start</span> <span class="o">+</span> <span class="n">nnn</span> <span class="o">*</span> <span class="p">(</span><span class="n">tomoe_fov</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">tmpra</span> <span class="o">=</span> <span class="n">ra_start</span> <span class="o">+</span> <span class="n">nnn</span> <span class="o">*</span> <span class="p">(</span><span class="n">tomoe_fov</span> <span class="o">-</span> <span class="n">overlap</span><span class="p">)</span> <span class="o">/</span> <span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">tmpdec</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mf">180.0</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">tmpra</span> <span class="o">&lt;</span> <span class="mf">360.0</span> <span class="ow">and</span> <span class="n">tmpdec</span> <span class="o">&lt;</span> <span class="mf">90.0</span><span class="p">:</span>
+                <span class="n">tmpra_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tmpra</span><span class="p">)</span>
+                <span class="n">tmpdec_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tmpdec</span><span class="p">)</span>
+                <span class="n">tmpfov_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fovnum</span><span class="p">)</span>
+                <span class="n">c_icrs</span> <span class="o">=</span> <span class="n">SkyCoord</span><span class="p">(</span><span class="n">ra</span><span class="o">=</span><span class="n">tmpra</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">degree</span><span class="p">,</span> <span class="n">dec</span><span class="o">=</span><span class="n">tmpdec</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">degree</span><span class="p">,</span> <span class="n">frame</span><span class="o">=</span><span class="s1">&#39;icrs&#39;</span><span class="p">)</span>
+                <span class="n">lb_galactic</span> <span class="o">=</span> <span class="n">c_icrs</span><span class="o">.</span><span class="n">galactic</span>
+                <span class="n">tmplll</span> <span class="o">=</span> <span class="n">lb_galactic</span><span class="o">.</span><span class="n">l</span><span class="o">.</span><span class="n">degree</span>
+                <span class="n">tmpbbb</span> <span class="o">=</span> <span class="n">lb_galactic</span><span class="o">.</span><span class="n">b</span><span class="o">.</span><span class="n">degree</span>
+                <span class="n">tmplll_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tmplll</span><span class="p">)</span>
+                <span class="n">tmpbbb_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tmpbbb</span><span class="p">)</span>
+                <span class="n">fovnum</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">tmpdec</span> <span class="o">+=</span> <span class="p">(</span><span class="n">tomoe_fov</span> <span class="o">-</span> <span class="n">overlap</span><span class="p">)</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mf">3.0</span><span class="p">)</span> <span class="o">/</span> <span class="mf">2.0</span>
+    <span class="c1">### Dec &lt; 0</span>
+    <span class="n">tmpdec</span> <span class="o">=</span> <span class="n">dec_start</span> <span class="o">-</span> <span class="p">(</span><span class="n">tomoe_fov</span> <span class="o">-</span> <span class="n">overlap</span><span class="p">)</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mf">3.0</span><span class="p">)</span> <span class="o">/</span> <span class="mf">2.0</span>
+    <span class="k">while</span> <span class="n">tmpdec</span> <span class="o">&gt;=</span> <span class="o">-</span><span class="mf">60.0</span><span class="p">:</span>
+        <span class="c1"># print (tmpdec)</span>
+        <span class="k">for</span> <span class="n">nnn</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">int</span><span class="p">((</span><span class="mf">360.0</span> <span class="o">+</span> <span class="n">overlap</span><span class="p">)</span> <span class="o">/</span> <span class="p">((</span><span class="n">tomoe_fov</span> <span class="o">-</span> <span class="n">overlap</span><span class="p">)</span> <span class="o">/</span> <span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">tmpdec</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mf">180.0</span><span class="p">))</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)):</span>
+            <span class="k">if</span> <span class="n">nnn</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">tmpra</span> <span class="o">=</span> <span class="n">ra_start</span> <span class="o">+</span> <span class="n">nnn</span> <span class="o">*</span> <span class="p">(</span><span class="n">tomoe_fov</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">tmpra</span> <span class="o">=</span> <span class="n">ra_start</span> <span class="o">+</span> <span class="n">nnn</span> <span class="o">*</span> <span class="p">(</span><span class="n">tomoe_fov</span> <span class="o">-</span> <span class="n">overlap</span><span class="p">)</span> <span class="o">/</span> <span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">tmpdec</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mf">180.0</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">tmpra</span> <span class="o">&lt;</span> <span class="mf">360.0</span><span class="p">:</span>
+                <span class="n">tmpra_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tmpra</span><span class="p">)</span>
+                <span class="n">tmpdec_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tmpdec</span><span class="p">)</span>
+                <span class="n">tmpfov_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fovnum</span><span class="p">)</span>
+                <span class="n">c_icrs</span> <span class="o">=</span> <span class="n">SkyCoord</span><span class="p">(</span><span class="n">ra</span><span class="o">=</span><span class="n">tmpra</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">degree</span><span class="p">,</span> <span class="n">dec</span><span class="o">=</span><span class="n">tmpdec</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">degree</span><span class="p">,</span> <span class="n">frame</span><span class="o">=</span><span class="s1">&#39;icrs&#39;</span><span class="p">)</span>
+                <span class="n">lb_galactic</span> <span class="o">=</span> <span class="n">c_icrs</span><span class="o">.</span><span class="n">galactic</span>
+                <span class="n">tmplll</span> <span class="o">=</span> <span class="n">lb_galactic</span><span class="o">.</span><span class="n">l</span><span class="o">.</span><span class="n">degree</span>
+                <span class="n">tmpbbb</span> <span class="o">=</span> <span class="n">lb_galactic</span><span class="o">.</span><span class="n">b</span><span class="o">.</span><span class="n">degree</span>
+                <span class="n">tmplll_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tmplll</span><span class="p">)</span>
+                <span class="n">tmpbbb_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tmpbbb</span><span class="p">)</span>
+                <span class="n">fovnum</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">tmpdec</span> <span class="o">-=</span> <span class="p">(</span><span class="n">tomoe_fov</span> <span class="o">-</span> <span class="n">overlap</span><span class="p">)</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mf">3.0</span><span class="p">)</span> <span class="o">/</span> <span class="mf">2.0</span>
+
+    <span class="k">return</span> <span class="n">tmpra_list</span><span class="p">,</span> <span class="n">tmpdec_list</span><span class="p">,</span> <span class="n">tmpfov_list</span><span class="p">,</span> <span class="n">fovnum</span><span class="p">,</span> <span class="n">tmplll_list</span><span class="p">,</span> <span class="n">tmpbbb_list</span>
+
+
+<div class="viewcode-block" id="mk_obs_time"><a class="viewcode-back" href="../generated/instance.html#instance.mk_obs_time">[docs]</a><span class="k">def</span> <span class="nf">mk_obs_time</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Define time interval for the observations</span>
+
+<span class="sd">    :returns: tuple with starting and ending time</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">utcoffset</span> <span class="o">=</span> <span class="o">+</span><span class="mi">9</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">hour</span>  <span class="c1"># JST</span>
+    <span class="n">time_start</span> <span class="o">=</span> <span class="n">Time</span><span class="p">(</span><span class="s1">&#39;2018-11-21T17:00:00&#39;</span><span class="p">)</span> <span class="o">-</span> <span class="n">utcoffset</span>
+    <span class="n">time_end</span> <span class="o">=</span> <span class="n">Time</span><span class="p">(</span><span class="s1">&#39;2018-11-22T07:00:00&#39;</span><span class="p">)</span> <span class="o">-</span> <span class="n">utcoffset</span>
+    <span class="k">return</span> <span class="n">time_start</span><span class="p">,</span> <span class="n">time_end</span></div>
+
+
+<div class="viewcode-block" id="mk_obs_set"><a class="viewcode-back" href="../generated/instance.html#instance.mk_obs_set">[docs]</a><span class="k">def</span> <span class="nf">mk_obs_set</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Build set of locations to observe</span>
+
+<span class="sd">    :returns: list with SkyCoord positions to observe</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1">### inital value</span>
+    <span class="n">ra_start</span> <span class="o">=</span> <span class="mf">0.0</span>
+    <span class="n">dec_start</span> <span class="o">=</span> <span class="mf">0.0</span>
+
+    <span class="c1">### tomoe field-of-view radius [deg] (and overlaps between adjacent regions)</span>
+    <span class="n">tomoerad</span> <span class="o">=</span> <span class="mf">4.4</span>
+    <span class="n">tomoe_fov</span> <span class="o">=</span> <span class="n">tomoerad</span> <span class="o">*</span> <span class="mf">2.0</span>
+    <span class="n">overlap</span> <span class="o">=</span> <span class="mf">0.223256</span>  <span class="c1"># 0.1</span>
+
+    <span class="c1">### Tomo-e regions defined here</span>
+    <span class="n">ra_list</span><span class="p">,</span> <span class="n">dec_list</span><span class="p">,</span> <span class="n">fovid_list</span><span class="p">,</span> <span class="n">fovnum</span><span class="p">,</span> <span class="n">lll_list</span><span class="p">,</span> <span class="n">bbb_list</span> <span class="o">=</span> \
+        <span class="n">tomoe_fov_radec</span><span class="p">(</span><span class="n">ra_start</span><span class="p">,</span> <span class="n">dec_start</span><span class="p">,</span> <span class="n">tomoe_fov</span><span class="p">,</span> <span class="n">overlap</span><span class="p">)</span>
+
+    <span class="c1">### preparation for the conversion (RA,Dec)==&gt;(El,Az)</span>
+    <span class="n">ra</span> <span class="o">=</span> <span class="n">Longitude</span><span class="p">(</span><span class="n">ra_list</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="n">u</span><span class="o">.</span><span class="n">deg</span><span class="p">)</span>
+    <span class="n">dec</span> <span class="o">=</span> <span class="n">Latitude</span><span class="p">(</span><span class="n">dec_list</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="n">u</span><span class="o">.</span><span class="n">deg</span><span class="p">)</span>
+    <span class="n">sky</span> <span class="o">=</span> <span class="n">SkyCoord</span><span class="p">(</span><span class="n">ra</span><span class="p">,</span> <span class="n">dec</span><span class="p">,</span> <span class="n">frame</span><span class="o">=</span><span class="s1">&#39;icrs&#39;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">sky</span></div>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">time_start</span><span class="p">,</span> <span class="n">time_end</span> <span class="o">=</span> <span class="n">mk_obs_time</span><span class="p">()</span>
+    <span class="n">sky</span> <span class="o">=</span> <span class="n">mk_obs_set</span><span class="p">()</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;set of observation locations:&quot;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">sky</span><span class="p">)):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{}</span><span class="se">\t</span><span class="s2">(</span><span class="si">{}</span><span class="s2">,</span><span class="si">{}</span><span class="s2">)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">sky</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">ra</span><span class="o">.</span><span class="n">degree</span><span class="p">,</span> <span class="n">sky</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">dec</span><span class="o">.</span><span class="n">degree</span><span class="p">))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;starting </span><span class="si">{}</span><span class="s2">, finishing </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">time_start</span><span class="p">,</span> <span class="n">time_end</span><span class="p">))</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../index.html">
+              <img class="logo" src="../_static/tomoe.jpg" alt="Logo"/>
+            </a></p>
+<h3><a href="../index.html">Table of Contents</a></h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../generated/simulator.html">simulator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../generated/scheduler.html">scheduler</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../generated/hidden.html">hidden</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../generated/instance.html">instance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../generated/motion_time.html">motion_time</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../generated/obs_data.html">obs_data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../generated/solution.html">solution</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../generated/astro_tools.html">astro_tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../generated/constants.html">constants</a></li>
+</ul>
+
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Telescope Scheduler  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="index.html" >Module code</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2019, jpp.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.1.2.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,157 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>Welcome to Telescope Scheduler’s documentation ! &#8212; Telescope Scheduler  documentation</title>
+    <link rel="stylesheet" href="_static/graphite.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="simulator" href="generated/simulator.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="generated/simulator.html" title="simulator"
+             accesskey="N">next</a> |</li>
+        <li class="nav-item nav-item-0"><a href="#">Telescope Scheduler  documentation</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="welcome-to-telescope-scheduler-s-documentation">
+<h1>Welcome to Telescope Scheduler’s documentation !<a class="headerlink" href="#welcome-to-telescope-scheduler-s-documentation" title="Permalink to this headline">¶</a></h1>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<p>A scheduler for observations on a high-cadence telescope.</p>
+<dl class="simple">
+<dt>Main objective:</dt><dd><ul class="simple">
+<li><p>given a list of positions in the sky</p></li>
+<li><p>maximize the number of positions which are observed at least three times</p></li>
+<li><p>respecting a minimum interval between consecutive observations of the same position</p></li>
+</ul>
+</dd>
+</dl>
+<p>The source code is available <a class="reference external" href="https://github.com/joaopedroso/telescope_scheduler">here</a>.</p>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<div class="toctree-wrapper compound">
+</div>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/simulator.html#module-simulator" title="simulator"><code class="xref py py-obj docutils literal notranslate"><span class="pre">simulator</span></code></a></p></td>
+<td><p>simulator: Example of usage of the telescope scheduler</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/scheduler.html#module-scheduler" title="scheduler"><code class="xref py py-obj docutils literal notranslate"><span class="pre">scheduler</span></code></a></p></td>
+<td><p>scheduler: Use a nearest-neighbor variant to obtain an observation schedule</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/hidden.html#module-hidden" title="hidden"><code class="xref py py-obj docutils literal notranslate"><span class="pre">hidden</span></code></a></p></td>
+<td><p>hidden: Indicate positions unavailable for observations</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/instance.html#module-instance" title="instance"><code class="xref py py-obj docutils literal notranslate"><span class="pre">instance</span></code></a></p></td>
+<td><p>instance: Define observation’s start/end time and positions</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/motion_time.html#module-motion_time" title="motion_time"><code class="xref py py-obj docutils literal notranslate"><span class="pre">motion_time</span></code></a></p></td>
+<td><p>motion_time: Define telescope’s movement speed</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/obs_data.html#module-obs_data" title="obs_data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">obs_data</span></code></a></p></td>
+<td><p>obs_data: Hold and preprocess information with experiment’s details</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/solution.html#module-solution" title="solution"><code class="xref py py-obj docutils literal notranslate"><span class="pre">solution</span></code></a></p></td>
+<td><p>solution: Hold and preprocess a scheduler’s solution</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/astro_tools.html#module-astro_tools" title="astro_tools"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astro_tools</span></code></a></p></td>
+<td><p>astro_tools: Useful tools for telescope scheduling based on astropy</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/constants.html#module-constants" title="constants"><code class="xref py py-obj docutils literal notranslate"><span class="pre">constants</span></code></a></p></td>
+<td><p>constants: Define constants specifying the observations and the algorithm’s behavior</p></td>
+</tr>
+</tbody>
+</table>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<p>This documentation was last updated on Jul 23, 2019.</p>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="#">
+              <img class="logo" src="_static/tomoe.jpg" alt="Logo"/>
+            </a></p>
+<h3><a href="#">Table of Contents</a></h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="generated/simulator.html">simulator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="generated/scheduler.html">scheduler</a></li>
+<li class="toctree-l1"><a class="reference internal" href="generated/hidden.html">hidden</a></li>
+<li class="toctree-l1"><a class="reference internal" href="generated/instance.html">instance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="generated/motion_time.html">motion_time</a></li>
+<li class="toctree-l1"><a class="reference internal" href="generated/obs_data.html">obs_data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="generated/solution.html">solution</a></li>
+<li class="toctree-l1"><a class="reference internal" href="generated/astro_tools.html">astro_tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="generated/constants.html">constants</a></li>
+</ul>
+
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="generated/simulator.html" title="simulator"
+             >next</a> |</li>
+        <li class="nav-item nav-item-0"><a href="#">Telescope Scheduler  documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2019, jpp.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.1.2.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,184 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>astro_tools &#8212; Telescope Scheduler  documentation</title>
+    <link rel="stylesheet" href="../_static/graphite.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/language_data.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="constants" href="constants.html" />
+    <link rel="prev" title="solution" href="solution.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="constants.html" title="constants"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="solution.html" title="solution"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Telescope Scheduler  documentation</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-astro_tools">
+<span id="astro-tools"></span><h1>astro_tools<a class="headerlink" href="#module-astro_tools" title="Permalink to this headline">¶</a></h1>
+<p>astro_tools: Useful tools for telescope scheduling based on astropy</p>
+<p class="rubric">Functions</p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#astro_tools.calc_altaz" title="astro_tools.calc_altaz"><code class="xref py py-obj docutils literal notranslate"><span class="pre">calc_altaz</span></code></a>(time, loc, obj)</p></td>
+<td><p>Convert RA/Dec to Alt/Az</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#astro_tools.is_hidden_by_moon" title="astro_tools.is_hidden_by_moon"><code class="xref py py-obj docutils literal notranslate"><span class="pre">is_hidden_by_moon</span></code></a>(moon, point, location, obstime)</p></td>
+<td><p>Determine if a position is hidden by the moon</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#astro_tools.is_within_angle" title="astro_tools.is_within_angle"><code class="xref py py-obj docutils literal notranslate"><span class="pre">is_within_angle</span></code></a>(obj_alt, obj_az, point_alt, …)</p></td>
+<td><p>Determine if a position is hidden by some object</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="function">
+<dt id="astro_tools.calc_altaz">
+<code class="sig-prename descclassname">astro_tools.</code><code class="sig-name descname">calc_altaz</code><span class="sig-paren">(</span><em class="sig-param">time</em>, <em class="sig-param">loc</em>, <em class="sig-param">obj</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/astro_tools.html#calc_altaz"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#astro_tools.calc_altaz" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert RA/Dec to Alt/Az</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>time</strong> – time of the observation</p></li>
+<li><p><strong>loc</strong> – array with positions</p></li>
+<li><p><strong>obj</strong> – array with positions in SkyCoord coordinated</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>tuple with arrays of positions in alt and az coordinates</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="astro_tools.is_within_angle">
+<code class="sig-prename descclassname">astro_tools.</code><code class="sig-name descname">is_within_angle</code><span class="sig-paren">(</span><em class="sig-param">obj_alt</em>, <em class="sig-param">obj_az</em>, <em class="sig-param">point_alt</em>, <em class="sig-param">point_az</em>, <em class="sig-param">within_angle</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/astro_tools.html#is_within_angle"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#astro_tools.is_within_angle" title="Permalink to this definition">¶</a></dt>
+<dd><p>Determine if a position is hidden by some object</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>obj_alt</strong> – interfering object’s position (alt)</p></li>
+<li><p><strong>obj_az</strong> – interfering object’s position (az)</p></li>
+<li><p><strong>point_alt</strong> – position of point being observed (alt)</p></li>
+<li><p><strong>point_az</strong> – position of point being observed (az)</p></li>
+<li><p><strong>within_angle</strong> – defines zone around center of interfering object to avoid</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>True if there is interference, False otherwise</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="astro_tools.is_hidden_by_moon">
+<code class="sig-prename descclassname">astro_tools.</code><code class="sig-name descname">is_hidden_by_moon</code><span class="sig-paren">(</span><em class="sig-param">moon</em>, <em class="sig-param">point</em>, <em class="sig-param">location</em>, <em class="sig-param">obstime</em>, <em class="sig-param">within_angle=0.25</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/astro_tools.html#is_hidden_by_moon"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#astro_tools.is_hidden_by_moon" title="Permalink to this definition">¶</a></dt>
+<dd><p>Determine if a position is hidden by the moon</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>moon</strong> – approximate coordinates of the moon, as returned by astropy.coordinates.get_body</p></li>
+<li><p><strong>point</strong> – sky position being observed (in SkyCoord coordinates)</p></li>
+<li><p><strong>location</strong> – EarthLocation from which observation is made (eg, Kiso)</p></li>
+<li><p><strong>obstime</strong> – observation time</p></li>
+<li><p><strong>within_angle</strong> – defines zone around center of interfering object to avoid</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>True if there is interference, False otherwise</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../index.html">
+              <img class="logo" src="../_static/tomoe.jpg" alt="Logo"/>
+            </a></p>
+<h3><a href="../index.html">Table of Contents</a></h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="simulator.html">simulator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="scheduler.html">scheduler</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hidden.html">hidden</a></li>
+<li class="toctree-l1"><a class="reference internal" href="instance.html">instance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="motion_time.html">motion_time</a></li>
+<li class="toctree-l1"><a class="reference internal" href="obs_data.html">obs_data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="solution.html">solution</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">astro_tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="constants.html">constants</a></li>
+</ul>
+
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="constants.html" title="constants"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="solution.html" title="solution"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Telescope Scheduler  documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2019, jpp.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.1.2.
+    </div>
+  </body>
+</html>

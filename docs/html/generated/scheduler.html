@@ -1,0 +1,154 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>scheduler &#8212; Telescope Scheduler  documentation</title>
+    <link rel="stylesheet" href="../_static/graphite.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/language_data.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="hidden" href="hidden.html" />
+    <link rel="prev" title="simulator" href="simulator.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="hidden.html" title="hidden"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="simulator.html" title="simulator"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Telescope Scheduler  documentation</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-scheduler">
+<span id="scheduler"></span><h1>scheduler<a class="headerlink" href="#module-scheduler" title="Permalink to this headline">¶</a></h1>
+<p>scheduler: Use a nearest-neighbor variant to obtain an observation schedule</p>
+<p>Function <cite>scheduler</cite> is the main tool in this software.
+The aim is to obtain an observation schedule for a high-cadence telescope,
+where the objective is to maximize the number of positions in the sky,
+from a given list, which are observed at least three times.</p>
+<p>See <cite>simulator.py</cite> or <cite>main</cite> part below for examples of usage.</p>
+<p class="rubric">Functions</p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#scheduler.scheduler" title="scheduler.scheduler"><code class="xref py py-obj docutils literal notranslate"><span class="pre">scheduler</span></code></a>(obs_data, time_now, last_obs, …)</p></td>
+<td><p>Obtain a schedule based on a variant of the nearest-neighbor heuristic</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="function">
+<dt id="scheduler.scheduler">
+<code class="sig-prename descclassname">scheduler.</code><code class="sig-name descname">scheduler</code><span class="sig-paren">(</span><em class="sig-param">obs_data</em>, <em class="sig-param">time_now</em>, <em class="sig-param">last_obs</em>, <em class="sig-param">earliest</em>, <em class="sig-param">current_best</em>, <em class="sig-param">hidden_list</em>, <em class="sig-param">time_lim</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scheduler.html#scheduler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scheduler.scheduler" title="Permalink to this definition">¶</a></dt>
+<dd><p>Obtain a schedule based on a variant of the nearest-neighbor heuristic</p>
+<p>Repeatedly construct observation schedules, until <cite>time_lim</cite> is reached.
+Each construction is based on a simulation, where at each point in time
+an observation is chosen among <cite>obs_data.sky</cite> positions available which
+are closest to the current position of the telescope.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>object of class <cite>Solution</cite>, specifying observation sequence and its evaluation</p>
+</dd>
+<dt class="field-even">Parameters</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>obs_data</strong> – data specifying the instance to be solved: sky positions and start/end times</p></li>
+<li><p><strong>time_now</strong> – current time</p></li>
+<li><p><strong>last_obs</strong> – sequence of observations made before</p></li>
+<li><p><strong>earliest</strong> – dictionary, position <cite>k</cite> cannot be observed before <cite>earliest[k]</cite></p></li>
+<li><p><strong>current_best</strong> – previously best known solution (<cite>None</cite> if not available)</p></li>
+<li><p><strong>hidden_list</strong> – indices in <cite>obs_data.sky</cite> that cannot be observed now (see <cite>hidden.py</cite>)</p></li>
+<li><p><strong>time_lim</strong> – clock time allowed for obtaining a solution (in seconds)</p></li>
+</ul>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>best sequence of observations found</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../index.html">
+              <img class="logo" src="../_static/tomoe.jpg" alt="Logo"/>
+            </a></p>
+<h3><a href="../index.html">Table of Contents</a></h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="simulator.html">simulator</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">scheduler</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hidden.html">hidden</a></li>
+<li class="toctree-l1"><a class="reference internal" href="instance.html">instance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="motion_time.html">motion_time</a></li>
+<li class="toctree-l1"><a class="reference internal" href="obs_data.html">obs_data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="solution.html">solution</a></li>
+<li class="toctree-l1"><a class="reference internal" href="astro_tools.html">astro_tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="constants.html">constants</a></li>
+</ul>
+
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="hidden.html" title="hidden"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="simulator.html" title="simulator"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Telescope Scheduler  documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2019, jpp.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.1.2.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,24 @@
+instance
+========
+
+.. automodule:: instance
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      mk_obs_set
+      mk_obs_time
+      tomoe_fov_radec
+   
+   
+
+   
+   
+   
+
+   
+   
+   

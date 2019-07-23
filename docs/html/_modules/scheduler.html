@@ -1,0 +1,256 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>scheduler &#8212; Telescope Scheduler  documentation</title>
+    <link rel="stylesheet" href="../_static/graphite.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/language_data.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Telescope Scheduler  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="index.html" accesskey="U">Module code</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for scheduler</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">scheduler: Use a nearest-neighbor variant to obtain an observation schedule</span>
+
+<span class="sd">Function `scheduler` is the main tool in this software.</span>
+<span class="sd">The aim is to obtain an observation schedule for a high-cadence telescope,</span>
+<span class="sd">where the objective is to maximize the number of positions in the sky,</span>
+<span class="sd">from a given list, which are observed at least three times.</span>
+
+<span class="sd">See `simulator.py` or `main` part below for examples of usage.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">random</span>
+<span class="kn">from</span> <span class="nn">time</span> <span class="k">import</span> <span class="n">time</span>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="k">import</span> <span class="n">timedelta</span>
+<span class="kn">from</span> <span class="nn">constants</span> <span class="k">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">solution</span> <span class="k">import</span> <span class="n">Solution</span>
+
+<span class="n">PRINTED_IDLING_MESSAGE</span> <span class="o">=</span> <span class="kc">False</span>  <span class="c1"># to avoid cluttering the output with warning messages</span>
+
+
+<div class="viewcode-block" id="scheduler"><a class="viewcode-back" href="../generated/scheduler.html#scheduler.scheduler">[docs]</a><span class="k">def</span> <span class="nf">scheduler</span><span class="p">(</span><span class="n">obs_data</span><span class="p">,</span> <span class="n">time_now</span><span class="p">,</span> <span class="n">last_obs</span><span class="p">,</span> <span class="n">earliest</span><span class="p">,</span> <span class="n">current_best</span><span class="p">,</span> <span class="n">hidden_list</span><span class="p">,</span> <span class="n">time_lim</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Obtain a schedule based on a variant of the nearest-neighbor heuristic</span>
+
+<span class="sd">    Repeatedly construct observation schedules, until `time_lim` is reached.</span>
+<span class="sd">    Each construction is based on a simulation, where at each point in time</span>
+<span class="sd">    an observation is chosen among `obs_data.sky` positions available which</span>
+<span class="sd">    are closest to the current position of the telescope.</span>
+
+<span class="sd">    :rtype: object of class `Solution`, specifying observation sequence and its evaluation</span>
+<span class="sd">    :param obs_data: data specifying the instance to be solved: sky positions and start/end times</span>
+<span class="sd">    :param time_now: current time</span>
+<span class="sd">    :param last_obs: sequence of observations made before</span>
+<span class="sd">    :param earliest: dictionary, position `k` cannot be observed before `earliest[k]`</span>
+<span class="sd">    :param current_best: previously best known solution (`None` if not available)</span>
+<span class="sd">    :param hidden_list: indices in `obs_data.sky` that cannot be observed now (see `hidden.py`)</span>
+<span class="sd">    :param time_lim: clock time allowed for obtaining a solution (in seconds)</span>
+<span class="sd">    :return: best sequence of observations found</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">cpu0</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
+    <span class="n">d</span> <span class="o">=</span> <span class="n">obs_data</span>  <span class="c1"># typing convenience</span>
+    <span class="n">now</span> <span class="o">=</span> <span class="p">(</span><span class="n">time_now</span> <span class="o">-</span> <span class="n">d</span><span class="o">.</span><span class="n">time_start</span><span class="p">)</span><span class="o">.</span><span class="n">value</span> <span class="o">*</span> <span class="mi">24</span> <span class="o">*</span> <span class="mi">3600</span>  <span class="c1"># simulation time</span>
+    <span class="n">earl</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="p">((</span><span class="n">earliest</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">-</span> <span class="n">d</span><span class="o">.</span><span class="n">time_start</span><span class="p">)</span><span class="o">.</span><span class="n">value</span> <span class="o">*</span> <span class="mi">24</span> <span class="o">*</span> <span class="mi">3600</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">earliest</span><span class="p">}</span>
+    <span class="k">if</span> <span class="n">LOG</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{:6}</span><span class="s2"> </span><span class="si">{:&gt;9}</span><span class="s2">: </span><span class="si">{:6}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;point&quot;</span><span class="p">,</span> <span class="s2">&quot;sim.time&quot;</span><span class="p">,</span> <span class="s2">&quot;#obs&quot;</span><span class="p">))</span>
+
+    <span class="n">visible</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">k</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">d</span><span class="o">.</span><span class="n">visible</span> <span class="k">if</span> <span class="n">earl</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">now</span> <span class="ow">and</span> <span class="n">d</span><span class="o">.</span><span class="n">tvisible</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">now</span> <span class="o">&lt;=</span> <span class="n">d</span><span class="o">.</span><span class="n">thidden</span><span class="p">[</span><span class="n">k</span><span class="p">])</span>
+    <span class="n">cluttered</span> <span class="o">=</span> <span class="n">visible</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">hidden_list</span><span class="p">))</span>
+
+    <span class="k">if</span> <span class="n">current_best</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">cluttered</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>  <span class="c1"># if initial observation, or if previous best is invalid</span>
+        <span class="n">best_n3obs</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+    <span class="k">else</span><span class="p">:</span>  <span class="c1"># previous solution may be used</span>
+        <span class="n">best</span> <span class="o">=</span> <span class="n">current_best</span>
+        <span class="n">best_n3obs</span> <span class="o">=</span> <span class="n">current_best</span><span class="o">.</span><span class="n">n3obs</span>
+
+    <span class="n">niter</span> <span class="o">=</span> <span class="mi">0</span>  <span class="c1"># number of iterations</span>
+    <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="n">niter</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">t</span> <span class="o">=</span> <span class="n">now</span>
+        <span class="n">start</span> <span class="o">=</span> <span class="n">earl</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>  <span class="c1"># start[k]: earliest time that &#39;k&#39; may be observed</span>
+        <span class="n">obs</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="mi">0</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">d</span><span class="o">.</span><span class="n">K</span><span class="p">}</span>  <span class="c1"># number of observations</span>
+        <span class="n">prev</span> <span class="o">=</span> <span class="n">last_obs</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">obs_seq</span> <span class="o">=</span> <span class="p">[</span><span class="n">prev</span><span class="p">]</span>  <span class="c1"># sequence of observations</span>
+        <span class="n">obs_times</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">LOG</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{:6}</span><span class="s2"> </span><span class="si">{:&gt;9}</span><span class="s2">: </span><span class="si">{:6}</span><span class="s2"> </span><span class="si">{:6}</span><span class="s2"> </span><span class="si">{:^13}</span><span class="s2"> -&gt; </span><span class="si">{:^14}</span><span class="s2"> | </span><span class="si">{!s:&gt;8}</span><span class="s2"> </span><span class="si">{:&gt;9}</span><span class="s2"> </span><span class="si">{:&gt;10}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="s2">&quot;point&quot;</span><span class="p">,</span> <span class="s2">&quot;time&quot;</span><span class="p">,</span> <span class="s2">&quot;#obs&quot;</span><span class="p">,</span> <span class="s2">&quot;#cand&quot;</span><span class="p">,</span> <span class="s2">&quot;sky&quot;</span><span class="p">,</span> <span class="s2">&quot;telescope&quot;</span><span class="p">,</span> <span class="s2">&quot;previous&quot;</span><span class="p">,</span> <span class="s2">&quot;movement&quot;</span><span class="p">,</span> <span class="s2">&quot;sim time&quot;</span><span class="p">))</span>
+        <span class="k">while</span> <span class="n">t</span> <span class="o">&lt;=</span> <span class="n">d</span><span class="o">.</span><span class="n">total_obs_seconds</span><span class="p">:</span>
+            <span class="c1"># check CPU limit was reached:</span>
+            <span class="k">if</span> <span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">cpu0</span> <span class="o">&gt;=</span> <span class="n">time_lim</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">best</span>
+
+            <span class="c1"># add next observation</span>
+            <span class="n">visible</span> <span class="o">=</span> <span class="p">[</span><span class="n">k</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">d</span><span class="o">.</span><span class="n">visible</span> <span class="k">if</span> <span class="n">start</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">t</span> <span class="ow">and</span> \
+                       <span class="n">d</span><span class="o">.</span><span class="n">tvisible</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">t</span> <span class="o">&lt;=</span> <span class="n">d</span><span class="o">.</span><span class="n">thidden</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="ow">and</span> <span class="n">k</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">hidden_list</span><span class="p">]</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">visible</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">global</span> <span class="n">PRINTED_IDLING_MESSAGE</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">PRINTED_IDLING_MESSAGE</span><span class="p">:</span>
+                    <span class="n">PRINTED_IDLING_MESSAGE</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;WARNING: scheduler: NN has no available points for observing, advancing time </span><span class="si">{}</span><span class="s2"> seconds&quot;</span>\
+                          <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">MAGICN4</span><span class="p">))</span>
+                <span class="n">t</span> <span class="o">+=</span> <span class="n">MAGICN4</span>
+                <span class="k">continue</span>
+
+            <span class="c1"># build candidate list for nearest neighbors</span>
+            <span class="n">mindist</span> <span class="o">=</span> <span class="n">INFINITY</span>
+            <span class="n">mindist2</span> <span class="o">=</span> <span class="n">INFINITY</span>  <span class="c1"># for having more than one candidate, keep track of 2nd-NN</span>
+            <span class="n">minobs</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">obs</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">visible</span><span class="p">)</span>
+            <span class="n">EPS</span> <span class="o">=</span> <span class="mf">1.e-4</span>
+            <span class="n">cand</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">visible</span><span class="p">:</span>
+                <span class="n">kobs</span> <span class="o">=</span> <span class="n">obs</span><span class="p">[</span><span class="n">k</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">kobs</span> <span class="o">&gt;</span> <span class="n">minobs</span> <span class="o">+</span> <span class="n">MAGICN3</span> <span class="ow">or</span> <span class="p">(</span><span class="n">kobs</span> <span class="o">&gt;=</span> <span class="mi">4</span> <span class="ow">and</span> <span class="n">minobs</span> <span class="o">&lt;=</span> <span class="mi">3</span><span class="p">):</span>  <span class="c1"># avoid 4-th time observations</span>
+                    <span class="k">continue</span>
+                <span class="n">kdist</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">move_time</span><span class="p">[</span><span class="n">prev</span><span class="p">,</span> <span class="n">k</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">kdist</span> <span class="o">&lt;</span> <span class="n">mindist</span> <span class="o">-</span> <span class="n">EPS</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">cand</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                        <span class="n">k2</span> <span class="o">=</span> <span class="n">cand</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                        <span class="n">mindist2</span> <span class="o">=</span> <span class="n">mindist</span>
+                    <span class="n">mindist</span> <span class="o">=</span> <span class="n">kdist</span>
+                    <span class="n">cand</span> <span class="o">=</span> <span class="p">[</span><span class="n">k</span><span class="p">]</span>
+                <span class="k">elif</span> <span class="n">kdist</span> <span class="o">&lt;</span> <span class="n">mindist</span> <span class="o">+</span> <span class="n">EPS</span><span class="p">:</span>
+                    <span class="n">mindist</span> <span class="o">=</span> <span class="n">kdist</span>
+                    <span class="n">cand</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">k</span><span class="p">)</span>
+                <span class="k">elif</span> <span class="n">kdist</span> <span class="o">&lt;</span> <span class="n">mindist2</span> <span class="o">-</span> <span class="n">EPS</span><span class="p">:</span>
+                    <span class="n">mindist2</span> <span class="o">=</span> <span class="n">kdist</span>
+                    <span class="n">k2</span> <span class="o">=</span> <span class="n">k</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">cand</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">2</span> <span class="ow">and</span> <span class="n">mindist2</span> <span class="o">&lt;</span> <span class="n">MAGICN5</span> <span class="o">*</span> <span class="n">mindist</span> <span class="o">-</span> <span class="n">EPS</span><span class="p">:</span>  <span class="c1"># avoid having only one candidate</span>
+                <span class="n">cand</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">k2</span><span class="p">)</span>
+
+            <span class="c1"># choose a (random) candidate from the list</span>
+            <span class="n">curr</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">cand</span><span class="p">)</span>
+            <span class="n">move</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">move_time</span><span class="p">[</span><span class="n">prev</span><span class="p">,</span> <span class="n">curr</span><span class="p">]</span>
+            <span class="n">delay</span> <span class="o">=</span> <span class="n">move</span> <span class="o">+</span> <span class="n">EXPOSURE</span>
+            <span class="k">if</span> <span class="n">LOG</span><span class="p">:</span>
+                <span class="kn">from</span> <span class="nn">astro_tools</span> <span class="k">import</span> <span class="n">calc_altaz</span>
+                <span class="kn">import</span> <span class="nn">astropy.units</span> <span class="k">as</span> <span class="nn">u</span>
+                <span class="n">alt</span><span class="p">,</span> <span class="n">az</span> <span class="o">=</span> <span class="n">calc_altaz</span><span class="p">(</span><span class="n">d</span><span class="o">.</span><span class="n">time_start</span> <span class="o">+</span> <span class="n">t</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">second</span><span class="p">,</span> <span class="n">telescope_pos</span><span class="p">,</span> <span class="n">d</span><span class="o">.</span><span class="n">sky</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{:6}</span><span class="s2"> </span><span class="si">{:9.2f}</span><span class="s2">: </span><span class="si">{:6}</span><span class="s2"> </span><span class="si">{:6}</span><span class="s2"> (</span><span class="si">{:5.1f}</span><span class="s2">,</span><span class="si">{:5.1f}</span><span class="s2">) -&gt; (</span><span class="si">{:5.1f}</span><span class="s2">, </span><span class="si">{:5.1f}</span><span class="s2">) | </span><span class="si">{!s:&gt;7}</span><span class="s2"> </span><span class="si">{:9.2f}</span><span class="s2"> </span><span class="si">{:&gt;11}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="n">curr</span><span class="p">,</span> <span class="n">delay</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">visible</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">cand</span><span class="p">),</span> <span class="n">d</span><span class="o">.</span><span class="n">sky</span><span class="p">[</span><span class="n">curr</span><span class="p">]</span><span class="o">.</span><span class="n">ra</span><span class="o">.</span><span class="n">degree</span><span class="p">,</span> <span class="n">d</span><span class="o">.</span><span class="n">sky</span><span class="p">[</span><span class="n">curr</span><span class="p">]</span><span class="o">.</span><span class="n">dec</span><span class="o">.</span><span class="n">degree</span><span class="p">,</span>
+                    <span class="n">alt</span><span class="p">[</span><span class="n">curr</span><span class="p">],</span> <span class="n">az</span><span class="p">[</span><span class="n">curr</span><span class="p">],</span>
+                    <span class="n">prev</span><span class="p">,</span> <span class="n">move</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">timedelta</span><span class="p">(</span><span class="n">seconds</span><span class="o">=</span><span class="nb">round</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="mi">0</span><span class="p">)))))</span>
+
+            <span class="k">if</span> <span class="n">t</span> <span class="o">+</span> <span class="n">delay</span> <span class="o">&gt;</span> <span class="n">d</span><span class="o">.</span><span class="n">total_obs_seconds</span><span class="p">:</span>
+                <span class="k">break</span>
+            <span class="n">obs_times</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
+            <span class="n">t</span> <span class="o">+=</span> <span class="n">delay</span>
+            <span class="n">start</span><span class="p">[</span><span class="n">curr</span><span class="p">]</span> <span class="o">=</span> <span class="n">t</span> <span class="o">+</span> <span class="n">delay</span> <span class="o">+</span> <span class="n">d</span><span class="o">.</span><span class="n">obs_gap_seconds</span>
+            <span class="n">obs</span><span class="p">[</span><span class="n">curr</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="n">obs_seq</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">curr</span><span class="p">)</span>
+            <span class="n">prev</span> <span class="o">=</span> <span class="n">curr</span>
+
+        <span class="n">sol</span> <span class="o">=</span> <span class="n">Solution</span><span class="p">(</span><span class="n">obs_seq</span><span class="p">,</span> <span class="n">obs_data</span><span class="o">.</span><span class="n">K</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">obs_seq</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">==</span> <span class="nb">sum</span><span class="p">(</span><span class="n">sol</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">sol</span><span class="o">.</span><span class="n">obs</span><span class="p">)</span>  <span class="c1"># -1 =&gt; first &quot;observation&quot; is None</span>
+        <span class="c1">#     if len(obs_seq) &gt; best_n_obs:</span>
+        <span class="k">if</span> <span class="n">sol</span><span class="o">.</span><span class="n">n3obs</span> <span class="o">&gt;</span> <span class="n">best_n3obs</span><span class="p">:</span>
+            <span class="n">best_n3obs</span> <span class="o">=</span> <span class="n">sol</span><span class="o">.</span><span class="n">n3obs</span>
+            <span class="n">best</span> <span class="o">=</span> <span class="n">sol</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+        <span class="c1"># values = [sum(1 for k in K if obs[k] == v) for v in range(n_max)]</span>
+        <span class="k">if</span> <span class="n">LOG</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{:6}</span><span class="se">\t</span><span class="si">{:9.2f}</span><span class="se">\t</span><span class="si">{:6}</span><span class="se">\t</span><span class="si">{:6}</span><span class="se">\t</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">niter</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">best</span><span class="o">.</span><span class="n">n3obs</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">best</span><span class="o">.</span><span class="n">seq</span><span class="p">),</span> <span class="n">best</span><span class="o">.</span><span class="n">values</span><span class="p">))</span></div>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="c1"># prepare data</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;preparing data...&quot;</span><span class="p">)</span>
+    <span class="kn">from</span> <span class="nn">instance</span> <span class="k">import</span> <span class="n">mk_obs_time</span><span class="p">,</span> <span class="n">mk_obs_set</span>
+    <span class="kn">from</span> <span class="nn">obs_data</span> <span class="k">import</span> <span class="n">ObsData</span>
+
+    <span class="n">time_start</span><span class="p">,</span> <span class="n">time_end</span> <span class="o">=</span> <span class="n">mk_obs_time</span><span class="p">()</span>
+    <span class="n">sky</span> <span class="o">=</span> <span class="n">mk_obs_set</span><span class="p">()</span>
+    <span class="n">obs_data</span> <span class="o">=</span> <span class="n">ObsData</span><span class="p">(</span><span class="n">sky</span><span class="p">,</span> <span class="n">time_start</span><span class="p">,</span> <span class="n">time_end</span><span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;starting 1 min iterated construction&quot;</span><span class="p">)</span>
+    <span class="n">t</span> <span class="o">=</span> <span class="n">time_start</span>
+    <span class="n">earliest</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">t</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">obs_data</span><span class="o">.</span><span class="n">visible</span><span class="p">}</span>
+    <span class="n">sol</span> <span class="o">=</span> <span class="n">scheduler</span><span class="p">(</span><span class="n">obs_data</span><span class="p">,</span> <span class="n">time_now</span><span class="o">=</span><span class="n">t</span><span class="p">,</span> <span class="n">last_obs</span><span class="o">=</span><span class="p">[</span><span class="kc">None</span><span class="p">],</span> <span class="n">earliest</span><span class="o">=</span><span class="n">earliest</span><span class="p">,</span>
+                    <span class="n">current_best</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">hidden_list</span><span class="o">=</span><span class="p">[],</span> <span class="n">time_lim</span><span class="o">=</span><span class="mi">60</span><span class="p">)</span>
+
+    <span class="n">tpos</span> <span class="o">=</span> <span class="n">sol</span><span class="o">.</span><span class="n">seq</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>  <span class="c1"># telescope position for the first observation</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{}</span><span class="se">\n</span><span class="s2">n.obs: </span><span class="si">{}</span><span class="se">\t</span><span class="s2">pos: </span><span class="si">{}</span><span class="se">\t</span><span class="s2">3obs/total: </span><span class="si">{}</span><span class="s2">/</span><span class="si">{}</span><span class="se">\t</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">tpos</span><span class="p">,</span> <span class="n">sol</span><span class="o">.</span><span class="n">n3obs</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">sol</span><span class="o">.</span><span class="n">seq</span><span class="p">),</span> <span class="n">sol</span><span class="o">.</span><span class="n">values</span><span class="p">))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;current solution: </span><span class="si">{}</span><span class="s2"> ...&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">sol</span><span class="o">.</span><span class="n">seq</span><span class="p">[:</span><span class="mi">10</span><span class="p">]))</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../index.html">
+              <img class="logo" src="../_static/tomoe.jpg" alt="Logo"/>
+            </a></p>
+<h3><a href="../index.html">Table of Contents</a></h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../generated/simulator.html">simulator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../generated/scheduler.html">scheduler</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../generated/hidden.html">hidden</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../generated/instance.html">instance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../generated/motion_time.html">motion_time</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../generated/obs_data.html">obs_data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../generated/solution.html">solution</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../generated/astro_tools.html">astro_tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../generated/constants.html">constants</a></li>
+</ul>
+
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Telescope Scheduler  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="index.html" >Module code</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2019, jpp.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.1.2.
+    </div>
+  </body>
+</html>

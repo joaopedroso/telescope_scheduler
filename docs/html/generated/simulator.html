@@ -1,0 +1,126 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>simulator &#8212; Telescope Scheduler  documentation</title>
+    <link rel="stylesheet" href="../_static/graphite.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/language_data.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="scheduler" href="scheduler.html" />
+    <link rel="prev" title="Welcome to Telescope Scheduler’s documentation !" href="../index.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="scheduler.html" title="scheduler"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="../index.html" title="Welcome to Telescope Scheduler’s documentation !"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Telescope Scheduler  documentation</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-simulator">
+<span id="simulator"></span><h1>simulator<a class="headerlink" href="#module-simulator" title="Permalink to this headline">¶</a></h1>
+<p>simulator: Example of usage of the telescope scheduler</p>
+<p>This program illustrates how to use the telescope scheduler implemented
+in module <cite>scheduler.py</cite>.</p>
+<p>A dummy function <cite>move_telescope</cite> simply prints the position where
+the real-world telescope should go.</p>
+<p>The simulation starts at the begin of the observation period specified in
+<cite>instance.py</cite>, making virtual observations of sky positions specified there
+until reaching the end of the observation period.</p>
+<dl class="simple">
+<dt>For adapting to a different setting:</dt><dd><ul class="simple">
+<li><p>Rewrite file <cite>instance.py</cite>, or otherwise specify functions <cite>mk_obs_time</cite>
+and <cite>mk_obs_set</cite> for specifying a different instance.</p></li>
+<li><p>Use function <cite>hidden</cite> specified in file <cite>hidden.py</cite> for updating in
+real-time the positions that are not available for observation (eg, due
+to being cluttered by clouds).</p></li>
+<li><p>Define the telescope’s movement speed in file <cite>motion_time.py</cite>.</p></li>
+</ul>
+</dd>
+</dl>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../index.html">
+              <img class="logo" src="../_static/tomoe.jpg" alt="Logo"/>
+            </a></p>
+<h3><a href="../index.html">Table of Contents</a></h3>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">simulator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="scheduler.html">scheduler</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hidden.html">hidden</a></li>
+<li class="toctree-l1"><a class="reference internal" href="instance.html">instance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="motion_time.html">motion_time</a></li>
+<li class="toctree-l1"><a class="reference internal" href="obs_data.html">obs_data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="solution.html">solution</a></li>
+<li class="toctree-l1"><a class="reference internal" href="astro_tools.html">astro_tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="constants.html">constants</a></li>
+</ul>
+
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="scheduler.html" title="scheduler"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="../index.html" title="Welcome to Telescope Scheduler’s documentation !"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Telescope Scheduler  documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2019, jpp.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.1.2.
+    </div>
+  </body>
+</html>

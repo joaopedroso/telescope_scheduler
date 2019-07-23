@@ -1,0 +1,143 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>hidden &#8212; Telescope Scheduler  documentation</title>
+    <link rel="stylesheet" href="../_static/graphite.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/language_data.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="instance" href="instance.html" />
+    <link rel="prev" title="scheduler" href="scheduler.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="instance.html" title="instance"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="scheduler.html" title="scheduler"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Telescope Scheduler  documentation</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-hidden">
+<span id="hidden"></span><h1>hidden<a class="headerlink" href="#module-hidden" title="Permalink to this headline">¶</a></h1>
+<p>hidden: Indicate positions unavailable for observations</p>
+<p>Function <cite>hidden(sky)</cite> is called before each observation to indicate positions not
+currently available, typically due to being concealed by clouds</p>
+<p class="rubric">Functions</p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#hidden.hidden" title="hidden.hidden"><code class="xref py py-obj docutils literal notranslate"><span class="pre">hidden</span></code></a>(sky)</p></td>
+<td><p>Return indices in <cite>sky</cite> list that are currently hidden by clouds or other objects</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="function">
+<dt id="hidden.hidden">
+<code class="sig-prename descclassname">hidden.</code><code class="sig-name descname">hidden</code><span class="sig-paren">(</span><em class="sig-param">sky</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hidden.html#hidden"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hidden.hidden" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return indices in <cite>sky</cite> list that are currently hidden by clouds or other objects</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><cite>sky</cite> list positions hidden by the moon are removed during preprocessing</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>sky</strong> – list of <cite>SkyCoord</cite> positions to be observed</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>indices of <cite>sky</cite> that cannot be observed now</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>sequence of int</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../index.html">
+              <img class="logo" src="../_static/tomoe.jpg" alt="Logo"/>
+            </a></p>
+<h3><a href="../index.html">Table of Contents</a></h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="simulator.html">simulator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="scheduler.html">scheduler</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">hidden</a></li>
+<li class="toctree-l1"><a class="reference internal" href="instance.html">instance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="motion_time.html">motion_time</a></li>
+<li class="toctree-l1"><a class="reference internal" href="obs_data.html">obs_data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="solution.html">solution</a></li>
+<li class="toctree-l1"><a class="reference internal" href="astro_tools.html">astro_tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="constants.html">constants</a></li>
+</ul>
+
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="instance.html" title="instance"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="scheduler.html" title="scheduler"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Telescope Scheduler  documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2019, jpp.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.1.2.
+    </div>
+  </body>
+</html>

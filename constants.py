@@ -22,7 +22,7 @@ ANGLE_FROM_MOON = 30  # reject observations withing this angle
 INFINITY = float("inf")
 MAGICN3 = 2  # number of additional visits wrt minimum for rejecting
 MAGICN4 = 5  # number of seconds to wait if not visiting position is available
-MAGICN5 = 1.1  # extra distance allowed for having multiple NN candidates (eg, 0.1 -> 10% longer distance than NN)
+MAGICN5 = 1.1  # extra distance allowed for having multiple NN candidates (eg, 1.1 -> 10% longer distance than NN)
 
 LOG = False  # whether to print verbose output
 EPS = 1.e-4  # tolerance for floating point operations

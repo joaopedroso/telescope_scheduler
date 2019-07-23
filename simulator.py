@@ -36,25 +36,29 @@ if __name__ == '__main__':
 
     # prepare/load data
     from instance import mk_obs_time, mk_obs_set
-    import pickle
 
-    filename = "telescope_sched_state.pck"
-    from os.path import exists
+    time_start, time_end = mk_obs_time()
+    sky = mk_obs_set()
+    obs_data = ObsData(sky, time_start, time_end)
 
-    state = False
-    if exists(filename):
-        with open(filename, 'rb') as f:
-            sky, time_start, time_end, obs_data = pickle.load(f)
-        state = True
-
-    time_start_, time_end_ = mk_obs_time()
-    if not state or time_start != time_start_ or time_end != time_end_:  # pickled data outdated
-        time_start, time_end = mk_obs_time()
-        sky = mk_obs_set()
-        obs_data = ObsData(sky, time_start, time_end)
-        with open(filename, 'wb') as f:
-            # Pickle the 'data' dictionary using the highest protocol available.
-            pickle.dump((sky, time_start, time_end, obs_data), f, pickle.HIGHEST_PROTOCOL)
+    # # if solving multiple times the same instance, pickling preprocessed data may be convenient:
+    # # comment the previous lines, and uncomment the following for re-loading data quickly:
+    # import pickle
+    # filename = "telescope_sched_state.pck"
+    # from os.path import exists
+    # state = False
+    # if exists(filename):
+    #     with open(filename, 'rb') as f:
+    #         sky, time_start, time_end, obs_data = pickle.load(f)
+    #     state = True
+    # time_start_, time_end_ = mk_obs_time()
+    # if not state or time_start != time_start_ or time_end != time_end_:  # pickled data outdated
+    #     time_start, time_end = mk_obs_time()
+    #     sky = mk_obs_set()
+    #     obs_data = ObsData(sky, time_start, time_end)
+    #     with open(filename, 'wb') as f:
+    #         # Pickle the 'data' dictionary using the highest protocol available.
+    #         pickle.dump((sky, time_start, time_end, obs_data), f, pickle.HIGHEST_PROTOCOL)
 
     # start simulation of an observation night
     t = time_start

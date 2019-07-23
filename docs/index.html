@@ -52,6 +52,13 @@
 </dd>
 </dl>
 <p>The source code is available <a class="reference external" href="https://github.com/joaopedroso/telescope_scheduler">here</a>.</p>
+<p>Workflow for adapting the code to a different setting:</p>
+<ol class="arabic simple">
+<li><p>Specify telescope moving speed in <cite>motion_time.py</cite> and and location, and exposure times in <cite>constants.py</cite>.</p></li>
+<li><p>Implement functions <cite>mk_obs_time()</cite> and <cite>mk_obs_set()</cite>, returning respectively the observation times and the set of sky positions to observe, in file <cite>instance.py</cite>.</p></li>
+<li><p>For real-time updates of positions that cannot be observed (e.g., due to being hidden by clouds), implement function <cite>hidden(sky)</cite> in file <cite>hidden.py</cite>.</p></li>
+<li><p>Adapt file <cite>simulator.py</cite> for your situation.</p></li>
+</ol>
 <div class="line-block">
 <div class="line"><br /></div>
 </div>
@@ -95,7 +102,7 @@
 <div class="line-block">
 <div class="line"><br /></div>
 </div>
-<p>This documentation was last updated on Jul 23, 2019.</p>
+<p>This documentation was last updated on Jul 24, 2019.</p>
 </div>
 
 

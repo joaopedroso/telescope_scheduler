@@ -34,7 +34,7 @@ def scheduler(obs_data, time_now, last_obs, earliest, current_best, hidden_list,
     :param earliest: dictionary, position `k` cannot be observed before `earliest[k]`
     :param current_best: previously best known solution (`None` if not available)
     :param hidden_list: indices in `obs_data.sky` that cannot be observed now (see `hidden.py`)
-    :param time_lim: clock time allowed for obtaining a solution (in seconds)
+    :param time_lim: clock time allowed for obtaining a solution (in seconds) (use 0 for only one construction)
     :return: best sequence of observations found
     """
     cpu0 = time()
@@ -67,7 +67,7 @@ def scheduler(obs_data, time_now, last_obs, earliest, current_best, hidden_list,
                 "point", "time", "#obs", "#cand", "sky", "telescope", "previous", "movement", "sim time"))
         while t <= d.total_obs_seconds:
             # check CPU limit was reached:
-            if time() - cpu0 >= time_lim:
+            if time_lim > EPS and time() - cpu0 >= time_lim:
                 return best
 
             # add next observation
@@ -86,7 +86,6 @@ def scheduler(obs_data, time_now, last_obs, earliest, current_best, hidden_list,
             mindist = INFINITY
             mindist2 = INFINITY  # for having more than one candidate, keep track of 2nd-NN
             minobs = min(obs[k] for k in visible)
-            EPS = 1.e-4
             cand = []
             for k in visible:
                 kobs = obs[k]
@@ -140,6 +139,9 @@ def scheduler(obs_data, time_now, last_obs, earliest, current_best, hidden_list,
         # values = [sum(1 for k in K if obs[k] == v) for v in range(n_max)]
         if LOG:
             print("{:6}\t{:9.2f}\t{:6}\t{:6}\t{}".format(niter, t, best.n3obs, len(best.seq), best.values))
+
+        if time_lim <= 0:  # make only one construction
+            return best
 
 
 if __name__ == "__main__":

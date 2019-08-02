@@ -76,7 +76,7 @@ def scheduler(obs_data, time_now, last_obs, earliest, current_best, hidden_list,
             if len(visible) == 0:
                 global PRINTED_IDLING_MESSAGE
                 if not PRINTED_IDLING_MESSAGE:
-                    PRINTED_IDLING_MESSAGE = True
+                    # PRINTED_IDLING_MESSAGE = True
                     print("WARNING: scheduler: NN has no available points for observing, advancing time {} seconds"\
                           .format(MAGICN4))
                 t += MAGICN4
@@ -86,12 +86,23 @@ def scheduler(obs_data, time_now, last_obs, earliest, current_best, hidden_list,
             mindist = INFINITY
             mindist2 = INFINITY  # for having more than one candidate, keep track of 2nd-NN
             minobs = min(obs[k] for k in visible)
+            has12obs = any(obs[k]==1 or obs[k]==2 for k in visible)
+            # has1obs = any(obs[k]==1 for k in visible)
+            # has2obs = any(obs[k]==2 for k in visible)
             cand = []
             for k in visible:
                 kobs = obs[k]
-                if kobs > minobs + MAGICN3 or (kobs >= 4 and minobs <= 3):  # avoid 4-th time observations
-                    continue
+                # # old heuristic:
+                # if kobs > minobs + MAGICN3 or (kobs >= 3 and minobs <= 2):  # avoid 4-th time observations
+                #     continue
                 kdist = d.move_time[prev, k]
+                #
+                # new heuristic:
+                if kobs >= 3 and minobs <= 2:
+                    continue
+                if kobs == 0 and has12obs:
+                    continue
+                #
                 if kdist < mindist - EPS:
                     if len(cand) > 0:
                         k2 = cand[0]

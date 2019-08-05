@@ -86,9 +86,10 @@ def scheduler(obs_data, time_now, last_obs, earliest, current_best, hidden_list,
             mindist = INFINITY
             mindist2 = INFINITY  # for having more than one candidate, keep track of 2nd-NN
             minobs = min(obs[k] for k in visible)
-            has12obs = any(obs[k]==1 or obs[k]==2 for k in visible)
-            # has1obs = any(obs[k]==1 for k in visible)
-            # has2obs = any(obs[k]==2 for k in visible)
+            # has12obs = any(obs[k]==1 or obs[k]==2 for k in visible)
+            has1obs = any(obs[k]==1 for k in visible)
+            has2obs = any(obs[k]==2 for k in visible)
+            has12obs = has1obs and has2obs
             cand = []
             for k in visible:
                 kobs = obs[k]

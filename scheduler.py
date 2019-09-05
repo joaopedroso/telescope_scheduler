@@ -174,4 +174,4 @@ if __name__ == "__main__":
 
     tpos = sol.seq[1]  # telescope position for the first observation
     print("{}\nn.obs: {}\tpos: {}\t3obs/total: {}/{}\t{}".format(t, 0, tpos, sol.n3obs, len(sol.seq), sol.values))
-    print("current solution: {} ...".format(sol.seq[:10]))
+    print("solution: {}".format(sol.seq))

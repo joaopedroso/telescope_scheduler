@@ -54,6 +54,7 @@ if __name__ == '__main__':
     from obs_data import ObsData
     from solution import Solution
     from scheduler import scheduler
+    from time import time
 
     # prepare/load data
     from instance import mk_obs_time, mk_obs_set
@@ -79,12 +80,20 @@ if __name__ == '__main__':
             # Pickle the 'data' dictionary using the highest protocol available.
             pickle.dump((sky, time_start, time_end, obs_data), f, pickle.HIGHEST_PROTOCOL)
 
+    cpu0 = time()
+    NITER = 10000
     for inst in range(len(time_start)):
         print("Observation limits: {}--{}".format(time_start[inst], time_end[inst]))
         earliest = {k: time_start[inst] for k in obs_data[inst].visible}
-        # print(earliest[3])
+        ### # print characteristics of the instances used
+        ### hours = (time_end[inst] - time_start[inst]).value * 24
+        ### HH = int(hours)
+        ### MM = int(hours*60) % 60
+        ### SS = int(hours*3600) % 60
+        ### print("{}\t% {}\t& {}\t& {:02d}H{:02d}M{:02d}\\\\".format(
+        ###     inst, len(obs_data[inst].K), len(obs_data[inst].visible), HH, MM, SS, hours))
+        ### continue
 
-        NITER = 1000
         n3obs_list = []
         best_n3obs = -1
         for i in range(NITER):
@@ -111,3 +120,7 @@ if __name__ == '__main__':
         plt.grid(zorder=0)
         plt.title("{}--{}".format(time_start[inst], time_end[inst]))
         plt.savefig("histogram_{}.pdf".format(inst+1))
+
+    tused = time() - cpu0
+    print("approximate total time used:", tused)
+    print("average per construction:", tused/len(time_start)/NITER)

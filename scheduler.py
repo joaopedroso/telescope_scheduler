@@ -76,7 +76,7 @@ def scheduler(obs_data, time_now, last_obs, earliest, current_best, hidden_list,
             if len(visible) == 0:
                 global PRINTED_IDLING_MESSAGE
                 if not PRINTED_IDLING_MESSAGE:
-                    # PRINTED_IDLING_MESSAGE = True
+                    PRINTED_IDLING_MESSAGE = True
                     print("WARNING: scheduler: NN has no available points for observing, advancing time {} seconds"\
                           .format(MAGICN4))
                 t += MAGICN4

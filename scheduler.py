@@ -174,4 +174,21 @@ if __name__ == "__main__":
 
     tpos = sol.seq[1]  # telescope position for the first observation
     print("{}\nn.obs: {}\tpos: {}\t3obs/total: {}/{}\t{}".format(t, 0, tpos, sol.n3obs, len(sol.seq), sol.values))
-    print("solution: {}".format(sol.seq))
+    print("solution:")
+    print("{:6} {:>9} {:^13} -> {:^14} |{:>10} {:<}".format(
+        "point", "sim.time", "sky", "telescope", "movement", "japan time"))
+
+    prev = None
+    t = 0
+    from astro_tools import calc_altaz
+    for i,curr in enumerate(sol.seq):
+        if i > 0:
+            move = obs_data.move_time[prev, curr]
+            clock = obs_data.time_start + t * u.second
+            alt, az = calc_altaz(clock, telescope_pos, obs_data.sky)
+            print("{:6} {:9.2f} ({:5.1f},{:5.1f}) -> ({:5.1f}, {:5.1f}) | {:9.2f} {}".format(
+                curr, t, obs_data.sky[curr].ra.degree, obs_data.sky[curr].dec.degree,
+                alt[curr], az[curr],
+                move, clock + 9 * u.hour))
+            t += move + EXPOSURE
+        prev = curr

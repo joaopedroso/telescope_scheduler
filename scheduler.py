@@ -155,61 +155,49 @@ def scheduler(obs_data, time_now, last_obs, earliest, current_best, hidden_list,
 
 
 if __name__ == "__main__":
-    # prepare data
-    print("preparing data...")
-    from instance import mk_obs_time, mk_obs_set
+    import sys
+    from astropy.time import Time
+    import astropy.units as u
     from obs_data import ObsData
+    from astro_tools import calc_altaz
 
-    # # if solving multiple times the same instance, pickling preprocessed data may be convenient:
-    # # comment the previous lines, and uncomment the following for re-loading data quickly:
-    # import pickle
-    # filename = "telescope_sched_state.pck"
-    # from os.path import exists
-    # state = False
-    # if exists(filename):
-    #     with open(filename, 'rb') as f:
-    #         sky, time_start, time_end, obs_data = pickle.load(f)
-    #     state = True
-    # time_start_, time_end_ = mk_obs_time()
-    # if not state or time_start != time_start_ or time_end != time_end_:  # pickled data outdated
-    #     time_start, time_end = mk_obs_time()
-    #     sky = mk_obs_set()
-    #     obs_data = ObsData(sky, time_start, time_end)
-    #     with open(filename, 'wb') as f:
-    #         # Pickle the 'data' dictionary using the highest protocol available.
-    #         pickle.dump((sky, time_start, time_end, obs_data), f, pickle.HIGHEST_PROTOCOL)
+    import importlib
 
-    # else, just precompute required data
-    time_start, time_end = mk_obs_time()
-    sky = mk_obs_set()
+    try:
+        inst  = importlib.import_module(sys.argv[1])
+        time_lim = float(sys.argv[2])
+    except:
+        print("usage: python {} instance time\n"
+              "where:\n"
+              "  instance.py - file defining mk_obs_time and mk_obs_set\n"
+              "  time - computing time allowed for finding a solution (s)\n"
+              "e.g.:\n"
+              "  python {} instance 60\n".format(sys.argv[0],sys.argv[0]))
+        exit(-1)
+
+    
+    # prepare data
+    time_start, time_end = inst.mk_obs_time()
+    sky = inst.mk_obs_set()
     obs_data = ObsData(sky, time_start, time_end)
 
-    print("starting 1 min iterated constructions")
     t = time_start
     earliest = {k: t for k in obs_data.visible}
+    PRINTED_IDLING_MESSAGE = True
     sol = scheduler(obs_data, time_now=t, last_obs=[None], earliest=earliest,
-                    current_best=None, hidden_list=[], time_lim=60)
+                    current_best=None, hidden_list=[], time_lim=time_lim)
 
-    print("3obs/total: {}/{}\t{}".format(sol.n3obs, len(sol.seq), sol.values))
-    print("solution:")
-    print("{:>6} {:>6} {:>9} {:^13} -> {:^14} |{:>10} {:<}".format(
-        "seq", "point", "sim.time", "sky", "telescope", "movement", "japan time"))
 
     prev = None
     t = 0
-    from astro_tools import calc_altaz
     for i,curr in enumerate(sol.seq):
         if i > 0:
-            if t < obs_data.tvisible[curr]:
-                print("[delaying {} seconds, observing {} ({:5.1f},{:5.1f})] : ".format(
-                    MAGICN4, curr, obs_data.sky[curr].ra.degree, obs_data.sky[curr].dec.degree))
-
+            # if t < obs_data.tvisible[curr]:
+            #     print("[delaying {} seconds, observing {} ({:5.1f},{:5.1f})] : ".format(
+            #         MAGICN4, curr, obs_data.sky[curr].ra.degree, obs_data.sky[curr].dec.degree))
             move = obs_data.move_time[prev, curr]
             clock = obs_data.time_start + t * u.second
             alt, az = calc_altaz(clock, telescope_pos, obs_data.sky)
-            print("{:6} {:6} {:9.2f} ({:5.1f},{:5.1f}) -> ({:5.1f}, {:5.1f}) | {:9.2f} {}".format(
-                i, curr, t, obs_data.sky[curr].ra.degree, obs_data.sky[curr].dec.degree,
-                alt[curr], az[curr],
-                move, clock + 9 * u.hour))
+            print("{:5.1f}, {:5.1f}".format(alt[curr], az[curr]))
             t += move + EXPOSURE
         prev = curr

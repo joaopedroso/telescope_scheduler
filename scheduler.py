@@ -169,7 +169,7 @@ if __name__ == "__main__":
     except:
         print("usage: python {} instance time\n"
               "where:\n"
-              "  instance.py - file defining mk_obs_time and mk_obs_set\n"
+              "  instance[.py] - file defining mk_obs_time and mk_obs_set\n"
               "  time - computing time allowed for finding a solution (s)\n"
               "e.g.:\n"
               "  python {} instance 60\n".format(sys.argv[0],sys.argv[0]))
@@ -198,6 +198,6 @@ if __name__ == "__main__":
             move = obs_data.move_time[prev, curr]
             clock = obs_data.time_start + t * u.second
             alt, az = calc_altaz(clock, telescope_pos, obs_data.sky)
-            print("{:5.1f}, {:5.1f}".format(alt[curr], az[curr]))
+            print("{:.3f}, {:.3f}".format(alt[curr], az[curr]))
             t += move + EXPOSURE
         prev = curr

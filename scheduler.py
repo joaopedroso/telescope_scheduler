@@ -197,7 +197,9 @@ if __name__ == "__main__":
             #         MAGICN4, curr, obs_data.sky[curr].ra.degree, obs_data.sky[curr].dec.degree))
             move = obs_data.move_time[prev, curr]
             clock = obs_data.time_start + t * u.second
+
             alt, az = calc_altaz(clock, telescope_pos, obs_data.sky)
-            print("{:.3f}, {:.3f}".format(alt[curr], az[curr]))
+            # print("{:.7f}, {:.7f}".format(alt[curr], az[curr]))
+            print("{}, {:.7f}, {:.7f}, {}".format(i, sky[curr].ra.degree, sky[curr].dec.degree, clock+9*u.hour))
             t += move + EXPOSURE
         prev = curr

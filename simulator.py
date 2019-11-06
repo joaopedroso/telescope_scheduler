@@ -26,6 +26,7 @@ if __name__ == '__main__':
     from solution import Solution
     from scheduler import scheduler
 
+    TIME_ADVANCE_IF_NO_OBSERVABLE = 15  # time to wait if there are no observable positions (eg, bad weather)
     TIME_LIM = 15  # solving time limit (in seconds)
     print("starting simulation, using {} s CPU time limit for scheduling".format(TIME_LIM))
 
@@ -70,6 +71,7 @@ if __name__ == '__main__':
     # time_end = time_start + 120 * u.second    # use for quick tests
 
 
+    curr = None
     tpos = sol.seq[1]  # telescope position for the first observation
     print()
     print("PRELIMINARY SOLUTION:")
@@ -89,7 +91,9 @@ if __name__ == '__main__':
         sol = scheduler(obs_data, time_now=t, last_obs=seq, earliest=earliest,
                         current_best=best, hidden_list=covered, time_lim=TIME_LIM)
         if len(sol.seq) < 2:
-            break
+            print("no observable positions, waiting {} seconds".format(TIME_ADVANCE_IF_NO_OBSERVABLE))
+            t += TIME_ADVANCE_IF_NO_OBSERVABLE * u.second
+            continue
         curr = sol.seq[1]
         print("\tcurrent solution: {} ...".format(sol.seq[:10]))
         print("\tnext: {}\t3obs/total: {}/{}\tobs.card: {}".format(curr, sol.n3obs, len(sol.seq), sol.values))

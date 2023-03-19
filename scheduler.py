@@ -18,7 +18,7 @@ from solution import Solution
 PRINTED_IDLING_MESSAGE = False  # to avoid cluttering the output with warning messages
 
 
-def scheduler(obs_data, time_now, last_obs, earliest, current_best, hidden_list, time_lim):
+def scheduler(target_obs, obs_data, time_now, last_obs, earliest, current_best, hidden_list, time_lim):
     """
     Obtain a schedule based on a variant of the nearest-neighbor heuristic
 
@@ -28,6 +28,7 @@ def scheduler(obs_data, time_now, last_obs, earliest, current_best, hidden_list,
     are closest to the current position of the telescope.
 
     :rtype: object of class `Solution`, specifying observation sequence and its evaluation
+    :param target_obs: number of desired observations (repetitions) for each position
     :param obs_data: data specifying the instance to be solved: sky positions and start/end times
     :param time_now: current time
     :param last_obs: sequence of observations made before
@@ -48,10 +49,10 @@ def scheduler(obs_data, time_now, last_obs, earliest, current_best, hidden_list,
     cluttered = visible.intersection(set(hidden_list))
 
     if current_best is None or len(cluttered) > 0:  # if initial observation, or if previous best is invalid
-        best_n3obs = -1
+        best_nXobs = -1
     else:  # previous solution may be used
         best = current_best
-        best_n3obs = current_best.n3obs
+        best_nXobs = current_best.nXobs
 
     niter = 0  # number of iterations
     while True:
@@ -86,9 +87,7 @@ def scheduler(obs_data, time_now, last_obs, earliest, current_best, hidden_list,
             mindist2 = INFINITY  # for having more than one candidate, keep track of 2nd-NN
             minobs = min(obs[k] for k in visible)
             # has12obs = any(obs[k]==1 or obs[k]==2 for k in visible)
-            has1obs = any(obs[k]==1 for k in visible)
-            has2obs = any(obs[k]==2 for k in visible)
-            has12obs = has1obs and has2obs
+            hasobs = any(obs[k]>0 and obs[k]<target_obs for k in visible)
             cand = []
             for k in visible:
                 kobs = obs[k]
@@ -98,9 +97,9 @@ def scheduler(obs_data, time_now, last_obs, earliest, current_best, hidden_list,
                 kdist = d.move_time[prev, k]
                 #
                 # new heuristic:
-                if kobs >= 3 and minobs <= 2:
+                if kobs >= target_obs and minobs <= target_obs-1:
                     continue
-                if kobs == 0 and has12obs:
+                if kobs == 0 and hasobs:
                     continue
                 #
                 if kdist < mindist - EPS:
@@ -139,16 +138,16 @@ def scheduler(obs_data, time_now, last_obs, earliest, current_best, hidden_list,
             obs_seq.append(curr)
             prev = curr
 
-        sol = Solution(obs_seq, obs_data.K)
+        sol = Solution(target_obs, obs_seq, obs_data.K)
         assert len(obs_seq) - 1 == sum(sol.obs[k] for k in sol.obs)  # -1 => first "observation" is None
         #     if len(obs_seq) > best_n_obs:
-        if sol.n3obs > best_n3obs:
-            best_n3obs = sol.n3obs
+        if sol.nXobs > best_nXobs:
+            best_nXobs = sol.nXobs
             best = sol.copy()
 
         # values = [sum(1 for k in K if obs[k] == v) for v in range(n_max)]
         if LOG:
-            print("{:6}\t{:9.2f}\t{:6}\t{:6}\t{}".format(niter, t, best.n3obs, len(best.seq), best.values))
+            print("{:6}\t{:9.2f}\t{:6}\t{:6}\t{}".format(niter, t, best.nXobs, len(best.seq), best.values))
 
         if time_lim <= 0:  # make only one construction
             return best
@@ -165,11 +164,13 @@ if __name__ == "__main__":
 
     try:
         inst  = importlib.import_module(sys.argv[1])
-        time_lim = float(sys.argv[2])
+        target_obs = int(sys.argv[2])
+        time_lim = float(sys.argv[3])
     except:
         print("usage: python {} instance time\n"
               "where:\n"
               "  instance[.py] - file defining mk_obs_time and mk_obs_set\n"
+              "  nobs - target number of observations per position\n"
               "  time - computing time allowed for finding a solution (s)\n"
               "e.g.:\n"
               "  python {} instance 60\n".format(sys.argv[0],sys.argv[0]))
@@ -184,7 +185,7 @@ if __name__ == "__main__":
     t = time_start
     earliest = {k: t for k in obs_data.visible}
     PRINTED_IDLING_MESSAGE = True
-    sol = scheduler(obs_data, time_now=t, last_obs=[None], earliest=earliest,
+    sol = scheduler(target_obs, obs_data, time_now=t, last_obs=[None], earliest=earliest,
                     current_best=None, hidden_list=[], time_lim=time_lim)
 
 

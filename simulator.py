@@ -26,6 +26,7 @@ if __name__ == '__main__':
     from solution import Solution
     from scheduler import scheduler
 
+    TARGET_OBS = 1   # specify here the number of desired observations of each position
     TIME_ADVANCE_IF_NO_OBSERVABLE = 15  # time to wait if there are no observable positions (eg, bad weather)
     TIME_LIM = 15  # solving time limit (in seconds)
     print("starting simulation, using {} s CPU time limit for scheduling".format(TIME_LIM))
@@ -65,7 +66,7 @@ if __name__ == '__main__':
     t = time_start
     earliest = {k: t for k in obs_data.visible}
     # construct initial (preliminary) solution
-    sol = scheduler(obs_data, time_now=t, last_obs=[None], earliest=earliest,
+    sol = scheduler(TARGET_OBS, obs_data, time_now=t, last_obs=[None], earliest=earliest,
                     current_best=None, hidden_list=[], time_lim=TIME_LIM)
 
     # time_end = time_start + 120 * u.second    # use for quick tests
@@ -75,7 +76,7 @@ if __name__ == '__main__':
     tpos = sol.seq[1]  # telescope position for the first observation
     print()
     print("PRELIMINARY SOLUTION:")
-    print("{}\nn.obs: {}\tpos: {}\t3obs/total: {}/{}\t{}".format(t, 0, tpos, sol.n3obs, len(sol.seq), sol.values))
+    print("{}\nn.obs: {}\tpos: {}\t3obs/total: {}/{}\t{}".format(t, 0, tpos, sol.nXobs, len(sol.seq), sol.values))
     print("current solution: {} ...".format(sol.seq[:10]))
     move_telescope(sky[tpos])
     print()
@@ -96,7 +97,7 @@ if __name__ == '__main__':
             continue
         curr = sol.seq[1]
         print("\tcurrent solution: {} ...".format(sol.seq[:10]))
-        print("\tnext: {}\t3obs/total: {}/{}\tobs.card: {}".format(curr, sol.n3obs, len(sol.seq), sol.values))
+        print("\tnext: {}\t3obs/total: {}/{}\tobs.card: {}".format(curr, sol.nXobs, len(sol.seq), sol.values))
         print("Simulating telescope movement to position {}: ".format(curr), end="\t")
         move_telescope(sky[curr])
 
@@ -115,4 +116,4 @@ if __name__ == '__main__':
 
     print("SUMMARY OF OBSERVATIONS:")
     final = Solution(seq, obs_data.K)
-    print("{}\nn.obs: {}\tpos: {}\t3obs/total: {}/{}\t{}".format(t, nobs, curr, final.n3obs, len(seq), final.values))
+    print("{}\nn.obs: {}\tpos: {}\t3obs/total: {}/{}\t{}".format(t, nobs, curr, final.nXobs, len(seq), final.values))

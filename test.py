@@ -6,6 +6,7 @@ Evaluates the telescope scheduler implemented in module `scheduler.py`.
 """
 
 from astropy.time import Time
+
 def mk_obs_times():
     """
     Define time interval for the observations
@@ -49,6 +50,8 @@ def mk_obs_times():
 
 
 if __name__ == '__main__':
+    TARGET_OBS = 7  # specify here the number of desired observations of each position
+
     from hidden import hidden
     from constants import *
     from obs_data import ObsData
@@ -94,28 +97,28 @@ if __name__ == '__main__':
         ###     inst, len(obs_data[inst].K), len(obs_data[inst].visible), HH, MM, SS, hours))
         ### continue
 
-        n3obs_list = []
-        best_n3obs = -1
+        nXobs_list = []
+        best_nXobs = -1
         for i in range(NITER):
             # construct initial (preliminary) solution
-            sol = scheduler(obs_data[inst], time_now=time_start[inst], last_obs=[None], earliest=earliest,
+            sol = scheduler(TARGET_OBS, obs_data[inst], time_now=time_start[inst], last_obs=[None], earliest=earliest,
                             current_best=None, hidden_list=[], time_lim=0)
      
-            n3obs_list.append(sol.n3obs)
-            if sol.n3obs > best_n3obs:
-                best_n3obs = sol.n3obs
+            nXobs_list.append(sol.nXobs)
+            if sol.nXobs > best_nXobs:
+                best_nXobs = sol.nXobs
                 best = sol.copy()
      
-            print("t3obs/total: {}/{}\t{}\t\t{}/{}".\
-                  format(sol.n3obs, len(sol.seq), sol.values, sol.n3obs, best.n3obs))
+            print("t{}obs/total: {}/{}\t{}\t\t{}/{}".\
+                  format(TARGET_OBS, sol.nXobs, len(sol.seq), sol.values, sol.nXobs, best.nXobs))
      
         import matplotlib.pyplot as plt
         import numpy as np
-        rmin = min(n3obs_list)
-        rmax = max(n3obs_list)
+        rmin = min(nXobs_list)
+        rmax = max(nXobs_list)
         bins = np.arange(rmin, rmax + 1.5) - 0.5
         fig, ax = plt.subplots(1, 1, sharex='col', sharey='row', figsize=(12, 7))
-        ax.hist(n3obs_list, label="Number of 3-observations", bins=bins, alpha=0.5)
+        ax.hist(nXobs_list, label="Number of %d-observations"%TARGET_OBS, bins=bins, alpha=0.5)
         ax.legend(loc='upper left')
         plt.grid(zorder=0)
         plt.title("{}--{}".format(time_start[inst], time_end[inst]))

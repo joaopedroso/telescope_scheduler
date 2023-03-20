@@ -50,7 +50,7 @@ def mk_obs_times():
 
 
 if __name__ == '__main__':
-    TARGET_OBS = 7  # specify here the number of desired observations of each position
+    TARGET_OBS = 5  # specify here the number of desired observations of each position
 
     from hidden import hidden
     from constants import *

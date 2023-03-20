@@ -173,7 +173,7 @@ if __name__ == "__main__":
               "  nobs - target number of observations per position\n"
               "  time - computing time allowed for finding a solution (s)\n"
               "e.g.:\n"
-              "  python {} instance 60\n".format(sys.argv[0],sys.argv[0]))
+              "  python {} instance 3 60\n".format(sys.argv[0],sys.argv[0]))
         exit(-1)
 
     

@@ -76,7 +76,7 @@ if __name__ == '__main__':
     tpos = sol.seq[1]  # telescope position for the first observation
     print()
     print("PRELIMINARY SOLUTION:")
-    print("{}\nn.obs: {}\tpos: {}\t3obs/total: {}/{}\t{}".format(t, 0, tpos, sol.nXobs, len(sol.seq), sol.values))
+    print("{}\nn.obs: {}\tpos: {}\t{}obs/total: {}/{}\t{}".format(t, 0, tpos, TARGET_OBS, sol.nXobs, len(sol.seq), sol.values))
     print("current solution: {} ...".format(sol.seq[:10]))
     move_telescope(sky[tpos])
     print()
@@ -97,7 +97,7 @@ if __name__ == '__main__':
             continue
         curr = sol.seq[1]
         print("\tcurrent solution: {} ...".format(sol.seq[:10]))
-        print("\tnext: {}\t3obs/total: {}/{}\tobs.card: {}".format(curr, sol.nXobs, len(sol.seq), sol.values))
+        print("\tnext: {}\t{}obs/total: {}/{}\tobs.card: {}".format(curr, TARGET_OBS, sol.nXobs, len(sol.seq), sol.values))
         print("Simulating telescope movement to position {}: ".format(curr), end="\t")
         move_telescope(sky[curr])
 
@@ -116,4 +116,4 @@ if __name__ == '__main__':
 
     print("SUMMARY OF OBSERVATIONS:")
     final = Solution(seq, obs_data.K)
-    print("{}\nn.obs: {}\tpos: {}\t3obs/total: {}/{}\t{}".format(t, nobs, curr, final.nXobs, len(seq), final.values))
+    print("{}\nn.obs: {}\tpos: {}\t{}obs/total: {}/{}\t{}".format(t, nobs, curr, TARGET_OBS, final.nXobs, len(seq), final.values))
